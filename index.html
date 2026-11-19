@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diccionario Clínico · Psicopatología 1 · UAM</title>
+<meta name="author" content="MSc. Erick Ríos">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&display=swap" rel="stylesheet">
+<style>
+/* Diccionario Clínico de Psicopatología · MSc. Erick Ríos · UAM 2026
+   La configuración de Supabase está al inicio del <script>, más abajo. */
+:root{
+  --paper:#f4f2ed; --sheet:#fffdf9; --ink:#14213d; --ink-2:#34405a; --muted:#6b7385;
+  --rule:#d8d2c4; --rule-2:#e9e5db; --accent:#0e5a63; --accent-2:#0b4950; --accent-soft:#e2eded;
+  --warn:#8a3b12; --warn-soft:#f6e9df; --ok:#2f6b3a; --ok-soft:#e5efe5;
+  --serif:"Source Serif 4", Georgia, "Times New Roman", serif;
+  --sans:"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15.5px;line-height:1.6;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--accent)}
+.wrap{max-width:1180px;margin:0 auto;padding:0 28px}
+
+/* ---------- Encabezado ---------- */
+.masthead{background:var(--ink);color:#f4f2ed;border-bottom:4px solid var(--accent)}
+.masthead .wrap{display:grid;grid-template-columns:1fr auto;gap:32px;align-items:end;padding-top:34px;padding-bottom:26px}
+.eyebrow{font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;color:#a9b3c7;margin:0 0 10px}
+.masthead h1{font-family:var(--serif);font-weight:600;font-size:clamp(30px,4.2vw,46px);line-height:1.05;margin:0;letter-spacing:-.01em}
+.masthead h1 span{font-weight:400;font-style:italic;color:#c9d4d6}
+.masthead .sub{margin:10px 0 0;color:#c4cbd8;max-width:620px;font-size:15px}
+.meter{min-width:220px;text-align:right}
+.meter .num{font-family:var(--serif);font-size:38px;line-height:1;font-weight:600}
+.meter .num small{font-size:18px;color:#a9b3c7;font-weight:400}
+.meter .lbl{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#a9b3c7;margin-top:4px}
+.meter .bar{height:4px;background:#2b3854;margin-top:10px}
+.meter .bar i{display:block;height:100%;background:#7fb5b9;width:0;transition:width .6s ease}
+
+/* ---------- Navegación ---------- */
+.tabs{background:var(--sheet);border-bottom:1px solid var(--rule);position:sticky;top:0;z-index:20}
+.tabs .wrap{display:flex;gap:4px;overflow-x:auto}
+.tab{background:none;border:0;padding:15px 16px 13px;font-size:14px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap}
+.tab:hover{color:var(--ink)}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.tab .n{font-family:var(--serif);font-style:italic;color:var(--accent);margin-right:6px}
+
+.demo{background:var(--warn-soft);color:var(--warn);font-size:13px;border-bottom:1px solid #ead3c2}
+.demo .wrap{padding-top:8px;padding-bottom:8px}
+
+main{padding:34px 0 60px}
+.view{display:none}
+.view.active{display:block}
+
+/* ---------- Diccionario ---------- */
+.dict{display:grid;grid-template-columns:290px 1fr;gap:36px;align-items:start}
+.index{position:sticky;top:70px;max-height:calc(100vh - 90px);overflow:auto;padding-right:6px}
+.search{width:100%;padding:11px 12px;border:1px solid var(--rule);background:var(--sheet);border-radius:2px;outline:none}
+.search:focus{border-color:var(--accent)}
+.index h3{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:600;margin:22px 0 6px;padding-bottom:5px;border-bottom:1px solid var(--rule)}
+.index ul{list-style:none;margin:0;padding:0}
+.index li{margin:0}
+.index .t{display:flex;justify-content:space-between;align-items:baseline;width:100%;text-align:left;background:none;border:0;padding:4px 6px;font-family:var(--serif);font-size:16px;cursor:pointer;border-left:2px solid transparent}
+.index .t:hover{background:var(--rule-2)}
+.index .t.sel{border-left-color:var(--accent);background:var(--accent-soft)}
+.index .t.off{color:#a3a8b3;cursor:default;font-style:italic}
+.index .t.off:hover{background:none}
+.index .t em{font-family:var(--sans);font-style:normal;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:#b0b4bd}
+.index .t.pend em{color:var(--warn)}
+.idx-tools{display:flex;gap:8px;margin-top:22px}
+
+.sheet{background:var(--sheet);border:1px solid var(--rule);padding:44px 52px 40px;position:relative}
+.sheet:before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--accent)}
+.entry .cat{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);font-weight:600}
+.entry h2{font-family:var(--serif);font-weight:700;font-size:42px;line-height:1.1;margin:6px 0 4px;letter-spacing:-.01em}
+.entry .pos{font-family:var(--serif);font-style:italic;color:var(--muted);margin:0 0 22px}
+.entry .def{font-family:var(--serif);font-size:19px;line-height:1.6;margin:0 0 30px;padding-bottom:26px;border-bottom:1px solid var(--rule)}
+.entry h4{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:0 0 8px;font-weight:600}
+.registro{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--rule);margin-bottom:26px}
+.reg{padding:18px 20px}
+.reg + .reg{border-left:1px solid var(--rule)}
+.reg p{margin:0}
+.reg-col p{font-style:italic;color:var(--ink-2)}
+.reg-cli{background:var(--accent-soft)}
+.reg-cli h4{color:var(--accent)}
+.reg-cli p{font-family:var(--serif);font-size:16.5px}
+mark.term{background:none;color:inherit;border-bottom:2px solid var(--accent);font-weight:600}
+.nota{border-left:3px solid var(--warn);background:var(--warn-soft);padding:14px 18px;margin-bottom:26px}
+.nota h4{color:var(--warn)}
+.nota p{margin:0}
+.meta-grid{display:grid;grid-template-columns:1fr 1.4fr;gap:28px;padding-top:4px}
+.vease .lk{display:inline-block;margin:0 6px 6px 0;padding:3px 10px;border:1px solid var(--rule);font-family:var(--serif);font-size:15px;background:none;cursor:pointer}
+.vease .lk:hover{border-color:var(--accent);color:var(--accent)}
+.vease .lk.off{color:#a3a8b3;cursor:default;border-style:dashed}
+.fuente p{margin:0;font-size:13.5px;color:var(--ink-2);padding-left:22px;text-indent:-22px;word-break:break-word}
+.autor{margin:30px 0 0;padding-top:14px;border-top:1px solid var(--rule-2);font-size:12.5px;color:var(--muted);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.pager{display:flex;justify-content:space-between;margin-top:16px;gap:12px}
+.pager button{background:none;border:0;color:var(--muted);cursor:pointer;font-family:var(--serif);font-size:15px;padding:4px 0}
+.pager button:hover{color:var(--accent)}
+
+.intro h2{font-family:var(--serif);font-size:30px;margin:0 0 12px}
+.intro p{font-family:var(--serif);font-size:17px;color:var(--ink-2);max-width:640px}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:1px solid var(--rule);margin-top:28px}
+.steps div{padding:18px 18px 0 0}
+.steps b{font-family:var(--serif);font-size:26px;color:var(--accent);display:block;font-weight:600}
+.steps span{font-size:14px;color:var(--ink-2)}
+
+/* ---------- Botones y formularios ---------- */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border:1px solid var(--ink);background:var(--ink);color:#fff;border-radius:2px;cursor:pointer;font-size:14px;font-weight:500}
+.btn:hover{background:var(--accent-2);border-color:var(--accent-2)}
+.btn.ghost{background:transparent;color:var(--ink)}
+.btn.ghost:hover{background:var(--rule-2);color:var(--ink);border-color:var(--ink)}
+.btn.sm{padding:6px 12px;font-size:13px}
+.btn.ok{background:var(--ok);border-color:var(--ok)}
+.btn.warn{background:transparent;color:var(--warn);border-color:var(--warn)}
+.btn.warn:hover{background:var(--warn-soft)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+
+.compose{display:grid;grid-template-columns:1fr 1fr;gap:36px;align-items:start}
+.panel-title{font-family:var(--serif);font-size:28px;margin:0 0 6px}
+.lead{color:var(--ink-2);margin:0 0 26px;max-width:560px}
+.field{margin-bottom:22px}
+.field label{display:block;font-weight:600;font-size:14px;margin-bottom:3px}
+.field .hint{font-size:13px;color:var(--muted);margin:0 0 7px}
+.field input,.field select,.field textarea{width:100%;padding:10px 12px;border:1px solid var(--rule);background:var(--sheet);border-radius:2px;outline:none}
+.field textarea{resize:vertical;min-height:84px;line-height:1.5}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent)}
+.field .cnt{font-size:12px;color:var(--muted);text-align:right;margin-top:3px}
+.field .cnt.bad{color:var(--warn)}
+.field.err input,.field.err select,.field.err textarea{border-color:var(--warn)}
+.field .msg{font-size:12.5px;color:var(--warn);margin-top:4px;display:none}
+.field.err .msg{display:block}
+.chips{display:flex;flex-wrap:wrap;gap:6px;max-height:170px;overflow:auto;padding:10px;border:1px solid var(--rule);background:var(--sheet)}
+.chip{border:1px solid var(--rule);background:#fff;padding:3px 10px;font-size:13px;cursor:pointer;border-radius:2px}
+.chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.preview-col{position:sticky;top:70px}
+.preview-col .tag{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.preview-col .sheet{padding:32px 34px}
+.preview-col .entry h2{font-size:32px}
+.preview-col .entry .def{font-size:16.5px}
+.placeholder{color:#b0b4bd !important;font-style:italic}
+
+.done{max-width:620px;margin:20px auto;text-align:center}
+.done .code{font-family:var(--serif);font-size:44px;letter-spacing:.14em;border:1px solid var(--rule);background:var(--sheet);padding:14px 20px;margin:18px auto;display:inline-block}
+
+/* ---------- Ejercicios ---------- */
+.ex-modes{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:10px 0 0}
+.mode{border:1px solid var(--rule);background:var(--sheet);padding:22px;text-align:left;cursor:pointer;border-top:3px solid var(--ink)}
+.mode:hover{border-top-color:var(--accent)}
+.mode b{font-family:var(--serif);font-size:19px;display:block;margin-bottom:6px}
+.mode span{font-size:13.5px;color:var(--ink-2)}
+.quiz{max-width:760px}
+.q-head{display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px}
+.q-prog{height:3px;background:var(--rule);margin-bottom:24px}
+.q-prog i{display:block;height:100%;background:var(--accent);transition:width .3s}
+.q-prompt{font-family:var(--serif);font-size:20px;line-height:1.55;background:var(--sheet);border:1px solid var(--rule);padding:24px 28px;margin:0 0 8px}
+.q-ask{font-weight:600;margin:18px 0 12px}
+.blank{display:inline-block;min-width:110px;border-bottom:2px solid var(--ink);margin:0 3px}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.opt{text-align:left;padding:13px 16px;border:1px solid var(--rule);background:var(--sheet);cursor:pointer;font-family:var(--serif);font-size:17px;border-radius:2px}
+.opt:hover:not(:disabled){border-color:var(--ink)}
+.opt.right{border-color:var(--ok);background:var(--ok-soft)}
+.opt.wrong{border-color:var(--warn);background:var(--warn-soft)}
+.opt:disabled{cursor:default}
+.fb{margin-top:18px;padding:16px 18px;border-left:3px solid var(--ok);background:var(--ok-soft);display:none}
+.fb.bad{border-left-color:var(--warn);background:var(--warn-soft)}
+.fb p{margin:0 0 6px}
+.fb .row{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+.score{font-family:var(--serif);font-size:64px;line-height:1;margin:10px 0}
+
+/* ---------- Consultar / Docente ---------- */
+.narrow{max-width:520px}
+.status{margin-top:22px;padding:18px 20px;border:1px solid var(--rule);background:var(--sheet)}
+.badge{display:inline-block;font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:3px 9px;font-weight:600;border-radius:2px}
+.b-pendiente{background:#efe9d9;color:#7a5d12}
+.b-publicada{background:var(--ok-soft);color:var(--ok)}
+.b-devuelta{background:var(--warn-soft);color:var(--warn)}
+.mod-bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:18px}
+.seg{display:flex;border:1px solid var(--rule);background:var(--sheet)}
+.seg button{border:0;background:none;padding:8px 14px;font-size:13.5px;cursor:pointer}
+.seg button.on{background:var(--ink);color:#fff}
+.mcard{background:var(--sheet);border:1px solid var(--rule);margin-bottom:12px}
+.mcard summary{list-style:none;cursor:pointer;padding:14px 18px;display:flex;gap:14px;align-items:center;justify-content:space-between}
+.mcard summary::-webkit-details-marker{display:none}
+.mcard summary .tt{font-family:var(--serif);font-size:19px;font-weight:600}
+.mcard summary .who{font-size:13px;color:var(--muted)}
+.mcard .body{padding:4px 18px 18px;border-top:1px solid var(--rule-2)}
+.mcard .body .field{margin:14px 0 0}
+.mcard .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.empty{color:var(--muted);font-style:italic;padding:20px 0}
+
+footer{border-top:1px solid var(--rule);background:var(--sheet)}
+footer .wrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;padding-top:22px;padding-bottom:22px;font-size:13px;color:var(--muted)}
+footer .firma{font-family:var(--serif);font-size:15px;color:var(--ink)}
+footer .firma b{font-weight:600}
+.linkbtn{background:none;border:0;color:var(--muted);text-decoration:underline;cursor:pointer;font-size:13px;padding:0}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:11px 18px;font-size:14px;opacity:0;transition:.25s;pointer-events:none;z-index:50;border-radius:2px}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+#printArea{display:none}
+
+@media (max-width:900px){
+  .masthead .wrap{grid-template-columns:1fr}
+  .meter{text-align:left}
+  .dict,.compose{grid-template-columns:1fr}
+  .index{position:static;max-height:none}
+  .preview-col{position:static}
+  .sheet{padding:30px 24px 28px}
+  .registro,.meta-grid,.opts,.ex-modes,.steps{grid-template-columns:1fr}
+  .reg + .reg{border-left:0;border-top:1px solid var(--rule)}
+  .entry h2{font-size:34px}
+}
+
+/* ---------- Impresión / PDF ---------- */
+@media print{
+  @page{size:letter;margin:18mm 16mm}
+  body{background:#fff;font-size:11pt}
+  body > *:not(#printArea){display:none !important}
+  #printArea{display:block}
+  .p-cover{text-align:center;padding-top:60mm;page-break-after:always}
+  .p-cover .eyebrow{color:#555}
+  .p-cover h1{font-family:var(--serif);font-size:34pt;margin:6mm 0}
+  .p-cover p{font-family:var(--serif);font-size:13pt}
+  .p-entry{page-break-inside:avoid;border-top:1.5pt solid var(--ink);padding-top:5mm;margin-bottom:9mm}
+  .p-entry h2{font-family:var(--serif);font-size:20pt;margin:1mm 0 2mm}
+  .p-entry .cat{font-size:8pt;letter-spacing:.15em;text-transform:uppercase;color:var(--accent);font-weight:600}
+  .p-entry .def{font-family:var(--serif);font-size:11.5pt;margin:0 0 3mm}
+  .p-entry dl{margin:0;display:grid;grid-template-columns:34mm 1fr;gap:1.5mm 5mm;font-size:10pt}
+  .p-entry dt{font-weight:600;color:#555;font-size:8.5pt;text-transform:uppercase;letter-spacing:.06em;padding-top:.6mm}
+  .p-entry dd{margin:0}
+  .p-foot{font-size:8.5pt;color:#666;margin-top:2mm}
+}
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="wrap">
+    <div>
+      <p class="eyebrow">Psicopatología 1 · Universidad Americana (UAM)</p>
+      <h1>Diccionario Clínico <span>de Psicopatología</span></h1>
+      <p class="sub">33 términos para describir el estado mental y redactar la nota clínica con precisión técnica.</p>
+    </div>
+    <div class="meter" aria-live="polite">
+      <div class="num" id="mNum">0<small> / 33</small></div>
+      <div class="lbl">términos publicados</div>
+      <div class="bar"><i id="mBar"></i></div>
+    </div>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist">
+  <div class="wrap">
+    <button class="tab" role="tab" data-view="diccionario" aria-selected="true"><span class="n">I.</span>Diccionario</button>
+    <button class="tab" role="tab" data-view="redactar" aria-selected="false"><span class="n">II.</span>Redactar una ficha</button>
+    <button class="tab" role="tab" data-view="ejercicios" aria-selected="false"><span class="n">III.</span>Ejercicios</button>
+    <button class="tab" role="tab" data-view="estado" aria-selected="false"><span class="n">IV.</span>Estado de mi ficha</button>
+  </div>
+</nav>
+
+<div class="demo" id="demoBanner" hidden><div class="wrap"><b>Modo demostración.</b> Supabase aún no está configurado: las fichas se guardan solo en este navegador y la vista docente no pide contraseña.</div></div>
+
+<main>
+<div class="wrap">
+
+  <!-- I. DICCIONARIO -->
+  <section class="view active" id="v-diccionario">
+    <div class="dict">
+      <aside class="index">
+        <input class="search" id="q" type="search" placeholder="Buscar término o concepto…" aria-label="Buscar">
+        <div id="idx"></div>
+        <div class="idx-tools"><button class="btn ghost sm" id="btnPrint">Descargar PDF</button></div>
+      </aside>
+      <div id="entryPane"></div>
+    </div>
+  </section>
+
+  <!-- II. REDACTAR -->
+  <section class="view" id="v-redactar">
+    <div id="composeWrap">
+      <div class="compose">
+        <form id="fForm" novalidate>
+          <h2 class="panel-title">Redactar una ficha</h2>
+          <p class="lead">Elegí un término disponible y completá cada campo. Mientras escribís, a la derecha ves cómo quedará tu ficha en el diccionario. El docente la revisa antes de publicarla.</p>
+
+          <div class="field" data-f="autor">
+            <label for="f-autor">Nombre completo</label>
+            <input id="f-autor" maxlength="90" autocomplete="name">
+            <div class="msg">Escribí tu nombre completo.</div>
+          </div>
+
+          <div class="field" data-f="termino">
+            <label for="f-termino">Término</label>
+            <p class="hint">Los términos ya tomados aparecen deshabilitados.</p>
+            <select id="f-termino"></select>
+            <div class="msg">Elegí un término.</div>
+          </div>
+
+          <div class="field" data-f="definicion">
+            <label for="f-definicion">Definición técnica</label>
+            <p class="hint">Con tus palabras y apoyada en una fuente académica. Indicá qué es, en qué función psíquica se ubica y en qué cuadros aparece.</p>
+            <textarea id="f-definicion" rows="5" maxlength="900" data-min="140"></textarea>
+            <div class="cnt" data-c="definicion"></div>
+            <div class="msg">La definición debe tener al menos 140 caracteres.</div>
+          </div>
+
+          <div class="field" data-f="uso_coloquial">
+            <label for="f-uso_coloquial">Uso coloquial</label>
+            <p class="hint">¿Cómo lo diría una persona sin formación clínica? Escribí la expresión tal como se escucha.</p>
+            <textarea id="f-uso_coloquial" rows="2" maxlength="300" data-min="15"></textarea>
+            <div class="msg">Escribí al menos una expresión coloquial.</div>
+          </div>
+
+          <div class="field" data-f="uso_clinico">
+            <label for="f-uso_clinico">Uso clínico</label>
+            <p class="hint">Redactá una frase tal como aparecería en una nota clínica o en un examen del estado mental. Debe incluir el término.</p>
+            <textarea id="f-uso_clinico" rows="3" maxlength="500" data-min="60"></textarea>
+            <div class="msg" id="msgClin">La frase clínica debe tener al menos 60 caracteres e incluir el término.</div>
+          </div>
+
+          <div class="field" data-f="error_frecuente">
+            <label for="f-error_frecuente">Error frecuente</label>
+            <p class="hint">¿Con qué se suele confundir este término y cómo se distingue?</p>
+            <textarea id="f-error_frecuente" rows="3" maxlength="500" data-min="60"></textarea>
+            <div class="msg">Explicá la confusión frecuente (mínimo 60 caracteres).</div>
+          </div>
+
+          <div class="field" data-f="relacionados">
+            <label>Términos relacionados</label>
+            <p class="hint">Seleccioná entre 1 y 4 términos del diccionario.</p>
+            <div class="chips" id="chips"></div>
+            <div class="msg">Seleccioná al menos un término relacionado.</div>
+          </div>
+
+          <div class="field" data-f="fuente_apa">
+            <label for="f-fuente_apa">Fuente (APA 7)</label>
+            <p class="hint">Referencia completa y verificable. Usá *asteriscos* para la cursiva del título. Ej.: American Psychiatric Association. (2022). *Manual diagnóstico y estadístico de los trastornos mentales* (5.ª ed., texto rev.). Editorial Médica Panamericana.</p>
+            <textarea id="f-fuente_apa" rows="3" maxlength="500"></textarea>
+            <div class="msg">Escribí una referencia completa en APA 7 (con año entre paréntesis).</div>
+          </div>
+
+          <button class="btn" type="submit" id="btnSend">Enviar ficha a revisión</button>
+        </form>
+
+        <div class="preview-col">
+          <div class="tag">Vista previa</div>
+          <div class="sheet" id="preview"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- III. EJERCICIOS -->
+  <section class="view" id="v-ejercicios">
+    <div id="exWrap"></div>
+  </section>
+
+  <!-- IV. ESTADO -->
+  <section class="view" id="v-estado">
+    <div class="narrow">
+      <h2 class="panel-title">Estado de mi ficha</h2>
+      <p class="lead">Ingresá el código que recibiste al enviar tu ficha.</p>
+      <form id="stForm" class="field" style="display:flex;gap:8px">
+        <input id="stCode" placeholder="Ej.: K7Q2M9XA" maxlength="12" style="text-transform:uppercase">
+        <button class="btn" type="submit">Consultar</button>
+      </form>
+      <div id="stOut"></div>
+    </div>
+  </section>
+
+  <!-- V. DOCENTE -->
+  <section class="view" id="v-docente">
+    <div id="docWrap"></div>
+  </section>
+
+</div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="firma">Elaborado por <b>MSc. Erick Ríos</b> · Psicopatología 1 · Universidad Americana (UAM), 2026</div>
+    <div>Terminología de referencia: DSM-5-TR (APA, 2022). Material de uso académico. · <button class="linkbtn" id="btnDoc">Acceso docente</button></div>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+<div id="printArea"></div>
+
+<script>
+/* ============================================================
+   CONFIGURACIÓN — pegá aquí los datos de tu proyecto Supabase
+   (Project Settings → API). Usá SOLO la anon / publishable key.
+   ============================================================ */
+const CONFIG = {
+  SUPABASE_URL: "",
+  SUPABASE_ANON_KEY: ""
+};
+
+/* ============================================================
+   LOS 33 TÉRMINOS (podés editarlos aquí)
+   ============================================================ */
+const TERMINOS = [
+  ["Conciencia y orientación", ["Obnubilación","Desorientación","Despersonalización","Desrealización"]],
+  ["Atención y memoria", ["Distraibilidad","Amnesia","Confabulación"]],
+  ["Sensopercepción", ["Alucinación","Ilusión","Pseudoalucinación"]],
+  ["Curso y forma del pensamiento", ["Fuga de ideas","Bloqueo del pensamiento","Tangencialidad","Circunstancialidad","Descarrilamiento","Neologismo","Alogia"]],
+  ["Contenido del pensamiento", ["Delirio","Idea sobrevalorada","Obsesión","Compulsión","Ideación suicida"]],
+  ["Afecto y estado de ánimo", ["Eutimia","Anhedonia","Afecto aplanado","Labilidad afectiva","Disforia","Ansiedad"]],
+  ["Psicomotricidad y voluntad", ["Agitación psicomotora","Retardo psicomotor","Abulia","Catatonia"]],
+  ["Juicio y conciencia de enfermedad", ["Insight"]]
+];
+const LISTA = TERMINOS.flatMap(([c, ts]) => ts.map(t => ({ t, c })));
+const TOTAL = LISTA.length;
+const catDe = t => (LISTA.find(x => x.t === t) || {}).c || "";
+
+/* ---------- Fichas modelo (visibles en modo demostración) ---------- */
+const MODELOS = [
+  {
+    termino: "Alucinación", categoria: "Sensopercepción",
+    definicion: "Percepción que ocurre sin un estímulo externo que la provoque, con la nitidez y el impacto de una percepción normal, y que no está bajo el control voluntario de la persona. Puede presentarse en cualquier modalidad sensorial (auditiva, visual, olfativa, gustativa o táctil); las auditivas son las más frecuentes en los trastornos del espectro de la esquizofrenia.",
+    uso_coloquial: "«Estás alucinando», para decir que alguien exagera, imagina cosas o está muy sorprendido.",
+    uso_clinico: "El paciente refiere escuchar, desde hace dos semanas, una voz masculina que comenta sus actos cuando está solo; se documentan alucinaciones auditivas en tercera persona, sin crítica de la experiencia.",
+    error_frecuente: "Confundirla con la ilusión: en la alucinación no existe estímulo real; en la ilusión, un estímulo real se percibe de forma distorsionada. Tampoco toda alucinación indica psicosis: las hipnagógicas, al quedarse dormido, pueden darse en población sin patología.",
+    relacionados: "Ilusión, Pseudoalucinación, Delirio, Insight",
+    fuente_apa: "American Psychiatric Association. (2022). *Diagnostic and statistical manual of mental disorders* (5th ed., text rev.). https://doi.org/10.1176/appi.books.9780890425787",
+    autor: "MSc. Erick Ríos (ficha modelo)"
+  },
+  {
+    termino: "Anhedonia", categoria: "Afecto y estado de ánimo",
+    definicion: "Disminución o pérdida de la capacidad de experimentar placer o interés en actividades que antes resultaban gratificantes. En el DSM-5-TR, la pérdida marcada de interés o placer es uno de los dos síntomas nucleares del episodio depresivo mayor; también se describe entre los síntomas negativos de la esquizofrenia.",
+    uso_coloquial: "«Ando sin ganas de nada», «ya nada me divierte».",
+    uso_clinico: "Refiere que desde hace un mes dejó de jugar fútbol y de reunirse con sus amigos porque «ya no le encuentra gracia»; se identifica anhedonia de predominio social y recreativo.",
+    error_frecuente: "Confundirla con la tristeza: una persona puede presentar anhedonia sin referir tristeza. Tampoco equivale a la falta de energía (astenia) ni a la dificultad para iniciar y sostener actividades (abulia).",
+    relacionados: "Abulia, Afecto aplanado, Disforia",
+    fuente_apa: "American Psychological Association. (s. f.). Anhedonia. En *APA dictionary of psychology*. https://dictionary.apa.org/anhedonia",
+    autor: "MSc. Erick Ríos (ficha modelo)"
+  },
+  {
+    termino: "Fuga de ideas", categoria: "Curso y forma del pensamiento",
+    definicion: "Alteración del curso del pensamiento en la que las ideas se suceden con gran rapidez y el discurso salta de un tema a otro. Las conexiones entre ideas se conservan, pero se apoyan en asociaciones superficiales, juegos de palabras o estímulos del entorno, de modo que se pierde el objetivo inicial. Es característica de los episodios maníacos.",
+    uso_coloquial: "«Habla y habla sin parar, salta de un tema a otro y no hay quien lo siga».",
+    uso_clinico: "Discurso taquilálico y difícil de interrumpir, con fuga de ideas: pasa de su trabajo al clima y de ahí a una canción por asonancia de las palabras.",
+    error_frecuente: "Confundirla con el descarrilamiento: en la fuga de ideas el entrevistador todavía puede seguir cada salto; en el descarrilamiento la conexión lógica entre ideas se pierde. Tampoco equivale a hablar rápido (taquilalia), que puede darse sin alteración del curso.",
+    relacionados: "Descarrilamiento, Tangencialidad, Circunstancialidad",
+    fuente_apa: "American Psychological Association. (s. f.). Flight of ideas. En *APA dictionary of psychology*. https://dictionary.apa.org/flight-of-ideas",
+    autor: "MSc. Erick Ríos (ficha modelo)"
+  }
+];
+
+/* ============================================================
+   UTILIDADES
+   ============================================================ */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+const fmt = s => esc(s).replace(/\*([^*]+)\*/g, "<em>$1</em>").replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+const norm = s => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
+const genCode = () => { const ch = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; let s = ""; const r = crypto.getRandomValues(new Uint32Array(8)); for (const n of r) s += ch[n % ch.length]; return s; };
+const byAlpha = (a, b) => a.termino.localeCompare(b.termino, "es");
+function toast(m) { const t = $("#toast"); t.textContent = m; t.classList.add("show"); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("show"), 2600); }
+
+/* Expresión regular tolerante a tildes y flexiones para ubicar el término en un texto */
+const V = { a:"[aáàAÁ]", e:"[eéèEÉ]", i:"[iíìIÍ]", o:"[oóòOÓ]", u:"[uúüùUÚÜ]", n:"[nñNÑ]" };
+const W = "[\\wáéíóúñüÁÉÍÓÚÑÜ]*";
+const toPat = s => norm(s).replace(/[.*+?^${}()|[\]\\]/g, "\\$&").split("").map(c => V[c] || c).join("").replace(/\s+/g, "\\s+");
+function termRegexes(t) {
+  const out = [new RegExp(toPat(t) + W, "gi")];
+  const first = norm(t).split(/\s+/)[0];
+  const stem = first.slice(0, Math.max(5, first.length - 4));
+  out.push(new RegExp("\\b" + toPat(stem) + W, "gi"));
+  return out;
+}
+function findTerm(text, t) { for (const r of termRegexes(t)) { r.lastIndex = 0; if (r.test(text)) return r; } return null; }
+function markTerm(htmlSafe, t) { const r = findTerm(htmlSafe, t); return r ? htmlSafe.replace(r, m => `<mark class="term">${m}</mark>`) : htmlSafe; }
+function maskTerm(htmlSafe, t) { const r = findTerm(htmlSafe, t); return r ? htmlSafe.replace(r, '<span class="blank">&nbsp;</span>') : htmlSafe; }
+
+/* ============================================================
+   CAPA DE DATOS (Supabase o demostración local)
+   ============================================================ */
+const DEMO = !(CONFIG.SUPABASE_URL && CONFIG.SUPABASE_ANON_KEY);
+let sb = null;
+const LS = "diccionario-psicopato1-demo-v1";
+let mem = null;
+function dLoad() {
+  if (mem) return mem;
+  try { const s = localStorage.getItem(LS); if (s) { mem = JSON.parse(s); return mem; } } catch (e) {}
+  mem = MODELOS.map(m => ({ ...m, id: uid(), codigo: genCode(), estado: "publicada", comentario: null, creado: new Date().toISOString() }));
+  dSave(mem); return mem;
+}
+function dSave(d) { mem = d; try { localStorage.setItem(LS, JSON.stringify(d)); } catch (e) {} }
+const PUB_COLS = "id,termino,categoria,definicion,uso_coloquial,uso_clinico,error_frecuente,relacionados,fuente_apa,autor";
+
+const API = {
+  async init() { if (!DEMO) { const m = await import("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm"); sb = m.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY); } },
+  async publicadas() {
+    if (DEMO) return dLoad().filter(f => f.estado === "publicada");
+    const { data, error } = await sb.from("fichas").select(PUB_COLS).eq("estado", "publicada"); if (error) throw error; return data;
+  },
+  async ocupados() {
+    if (DEMO) return dLoad().filter(f => f.estado !== "devuelta").map(f => ({ termino: f.termino, estado: f.estado }));
+    const { data, error } = await sb.rpc("terminos_ocupados"); if (error) throw error; return data;
+  },
+  async enviar(f) {
+    if (DEMO) {
+      const d = dLoad();
+      if (d.some(x => x.termino === f.termino && x.estado !== "devuelta")) throw new Error("Ese término ya fue tomado. Elegí otro.");
+      d.push({ ...f, id: uid(), estado: "pendiente", comentario: null, creado: new Date().toISOString() }); dSave(d); return;
+    }
+    const { error } = await sb.from("fichas").insert(f);
+    if (error) { if (error.code === "23505") throw new Error("Ese término acaba de ser tomado por otra persona. Elegí otro."); throw error; }
+  },
+  async consultar(c) {
+    if (DEMO) { const f = dLoad().find(x => x.codigo === c); return f ? { termino: f.termino, estado: f.estado, comentario: f.comentario } : null; }
+    const { data, error } = await sb.rpc("consultar_ficha", { p_codigo: c }); if (error) throw error; return data && data[0] || null;
+  },
+  async sesion() { if (DEMO) return true; const { data } = await sb.auth.getSession(); return !!data.session; },
+  async login(email, pw) { const { error } = await sb.auth.signInWithPassword({ email, password: pw }); if (error) throw new Error("Correo o contraseña incorrectos."); },
+  async logout() { if (!DEMO) await sb.auth.signOut(); },
+  async todas() {
+    if (DEMO) return dLoad().slice().sort((a, b) => b.creado.localeCompare(a.creado));
+    const { data, error } = await sb.from("fichas").select("*").order("creado", { ascending: false }); if (error) throw error; return data;
+  },
+  async actualizar(id, patch) {
+    if (DEMO) { const d = dLoad(); const i = d.findIndex(x => x.id === id); d[i] = { ...d[i], ...patch }; dSave(d); return; }
+    const { error } = await sb.from("fichas").update({ ...patch, revisado: new Date().toISOString() }).eq("id", id); if (error) throw error;
+  },
+  async eliminar(id) {
+    if (DEMO) { dSave(dLoad().filter(x => x.id !== id)); return; }
+    const { error } = await sb.from("fichas").delete().eq("id", id); if (error) throw error;
+  }
+};
+
+/* ============================================================
+   ESTADO
+   ============================================================ */
+const S = { pub: [], ocup: [], sel: null, q: "" };
+const pubMap = () => Object.fromEntries(S.pub.map(f => [f.termino, f]));
+const ocupMap = () => Object.fromEntries(S.ocup.map(o => [o.termino, o.estado]));
+
+async function refresh() {
+  try { [S.pub, S.ocup] = await Promise.all([API.publicadas(), API.ocupados()]); }
+  catch (e) { console.error(e); toast("No se pudo conectar con la base de datos."); }
+  S.pub.sort(byAlpha);
+  const n = S.pub.length;
+  $("#mNum").innerHTML = `${n}<small> / ${TOTAL}</small>`;
+  $("#mBar").style.width = (n / TOTAL * 100) + "%";
+  renderIndex(); renderEntry(); fillTermSelect(); renderChips();
+}
+
+/* ============================================================
+   I. DICCIONARIO
+   ============================================================ */
+function renderIndex() {
+  const pm = pubMap(), om = ocupMap(), q = norm(S.q);
+  let html = "";
+  for (const [cat, ts] of TERMINOS) {
+    const items = ts.filter(t => {
+      if (!q) return true;
+      const f = pm[t];
+      return norm(t).includes(q) || (f && norm(f.definicion + " " + f.uso_clinico).includes(q));
+    });
+    if (!items.length) continue;
+    html += `<h3>${esc(cat)}</h3><ul>`;
+    for (const t of items) {
+      if (pm[t]) html += `<li><button class="t ${S.sel === t ? "sel" : ""}" data-t="${esc(t)}">${esc(t)}</button></li>`;
+      else html += `<li><span class="t off ${om[t] === "pendiente" ? "pend" : ""}">${esc(t)}<em>${om[t] === "pendiente" ? "en revisión" : "disponible"}</em></span></li>`;
+    }
+    html += `</ul>`;
+  }
+  $("#idx").innerHTML = html || `<p class="empty">Sin resultados para «${esc(S.q)}».</p>`;
+}
+function entryHTML(f, preview = false) {
+  const ph = (v, p) => v ? v : `<span class="placeholder">${p}</span>`;
+  const pm = pubMap();
+  const rel = (f.relacionados || "").split(",").map(s => s.trim()).filter(Boolean);
+  const relHTML = rel.length ? rel.map(r => pm[r] && !preview ? `<button class="lk" data-t="${esc(r)}">${esc(r)}</button>` : `<span class="lk off">${esc(r)}</span>`).join("") : ph("", "Términos relacionados");
+  const clin = f.uso_clinico ? markTerm(esc(f.uso_clinico), f.termino || "") : "";
+  return `<article class="entry">
+    <div class="cat">${esc(f.categoria) || "&nbsp;"}</div>
+    <h2>${ph(esc(f.termino), "Término")}</h2>
+    <p class="pos">sustantivo · psicopatología descriptiva</p>
+    <p class="def">${ph(esc(f.definicion), "La definición técnica aparecerá aquí.")}</p>
+    <div class="registro">
+      <div class="reg reg-col"><h4>Uso coloquial</h4><p>${ph(esc(f.uso_coloquial), "Cómo lo dice alguien sin formación clínica.")}</p></div>
+      <div class="reg reg-cli"><h4>Uso clínico</h4><p>${ph(clin, "Cómo se escribe en la nota clínica.")}</p></div>
+    </div>
+    <div class="nota"><h4>Error frecuente</h4><p>${ph(esc(f.error_frecuente), "Con qué se confunde y cómo se distingue.")}</p></div>
+    <div class="meta-grid">
+      <div class="vease"><h4>Véase también</h4>${relHTML}</div>
+      <div class="fuente"><h4>Fuente</h4><p>${ph(fmt(f.fuente_apa), "Referencia en APA 7.")}</p></div>
+    </div>
+    <p class="autor"><span>Ficha elaborada por: ${ph(esc(f.autor), "Nombre del estudiante")}</span><span>Revisión: MSc. Erick Ríos</span></p>
+  </article>`;
+}
+function renderEntry() {
+  const pane = $("#entryPane");
+  const pm = pubMap();
+  if (!S.sel || !pm[S.sel]) {
+    const n = S.pub.length;
+    pane.innerHTML = `<div class="sheet intro">
+      <p class="eyebrow" style="color:var(--accent)">Presentación</p>
+      <h2>Del habla cotidiana al lenguaje clínico</h2>
+      <p>Este diccionario reúne los términos que usarás para describir el estado mental de un paciente y redactar una nota clínica. Cada ficha muestra la definición técnica, el contraste entre el uso coloquial y el uso clínico, el error más frecuente y su fuente.</p>
+      <p>Las fichas las redactan los estudiantes del curso y se publican después de la revisión docente. Hay <b>${n}</b> de ${TOTAL} términos publicados.</p>
+      <div class="steps">
+        <div><b>01</b><span>Elegí un término disponible en <i>Redactar una ficha</i>.</span></div>
+        <div><b>02</b><span>Redactá la ficha con una fuente académica verificable.</span></div>
+        <div><b>03</b><span>Practicá con las fichas publicadas en <i>Ejercicios</i>.</span></div>
+      </div>
+      ${n ? `<p style="margin-top:28px"><button class="btn" data-t="${esc(S.pub[0].termino)}">Abrir el diccionario</button></p>` : ""}
+    </div>`;
+    return;
+  }
+  const i = S.pub.findIndex(f => f.termino === S.sel);
+  const prev = S.pub[i - 1], next = S.pub[i + 1];
+  pane.innerHTML = `<div class="sheet">${entryHTML(pm[S.sel])}</div>
+    <div class="pager">
+      <span>${prev ? `<button data-t="${esc(prev.termino)}">← ${esc(prev.termino)}</button>` : ""}</span>
+      <span>${next ? `<button data-t="${esc(next.termino)}">${esc(next.termino)} →</button>` : ""}</span>
+    </div>`;
+}
+function select(t) { S.sel = t; renderIndex(); renderEntry(); if (innerWidth < 900) $("#entryPane").scrollIntoView({ behavior: "smooth" }); else scrollTo({ top: 0, behavior: "smooth" }); }
+$("#v-diccionario").addEventListener("click", e => { const b = e.target.closest("[data-t]"); if (b && b.tagName === "BUTTON") select(b.dataset.t); });
+$("#q").addEventListener("input", e => { S.q = e.target.value; renderIndex(); });
+
+/* ---------- PDF / impresión ---------- */
+function printAll() {
+  const list = S.pub.slice().sort(byAlpha);
+  $("#printArea").innerHTML = `<div class="p-cover">
+      <p class="eyebrow">Psicopatología 1 · Universidad Americana (UAM)</p>
+      <h1>Diccionario Clínico de Psicopatología</h1>
+      <p>${list.length} términos de uso clínico</p>
+      <p style="margin-top:30mm">Elaborado por los estudiantes del curso<br>Edición y revisión: <b>MSc. Erick Ríos</b></p>
+      <p style="font-size:10pt;color:#666">Managua, ${new Date().getFullYear()}</p>
+    </div>` + list.map(f => `<section class="p-entry">
+      <div class="cat">${esc(f.categoria)}</div><h2>${esc(f.termino)}</h2>
+      <p class="def">${esc(f.definicion)}</p>
+      <dl><dt>Uso coloquial</dt><dd><i>${esc(f.uso_coloquial)}</i></dd>
+      <dt>Uso clínico</dt><dd>${esc(f.uso_clinico)}</dd>
+      <dt>Error frecuente</dt><dd>${esc(f.error_frecuente)}</dd>
+      <dt>Véase también</dt><dd>${esc(f.relacionados)}</dd>
+      <dt>Fuente</dt><dd>${fmt(f.fuente_apa)}</dd></dl>
+      <p class="p-foot">Ficha elaborada por ${esc(f.autor)} · Revisión: MSc. Erick Ríos</p></section>`).join("");
+  print();
+}
+$("#btnPrint").onclick = printAll;
+/* ============================================================
+   II. REDACTAR
+   ============================================================ */
+const FIELDS = ["autor", "termino", "definicion", "uso_coloquial", "uso_clinico", "error_frecuente", "fuente_apa"];
+const rel = new Set();
+function fillTermSelect() {
+  const sel = $("#f-termino"); if (!sel) return;
+  const cur = sel.value, om = ocupMap();
+  sel.innerHTML = `<option value="">— Elegí un término —</option>` + TERMINOS.map(([c, ts]) =>
+    `<optgroup label="${esc(c)}">${ts.map(t => `<option value="${esc(t)}" ${om[t] ? "disabled" : ""}>${esc(t)}${om[t] === "publicada" ? " · publicado" : om[t] === "pendiente" ? " · en revisión" : ""}</option>`).join("")}</optgroup>`).join("");
+  if (cur && !om[cur]) sel.value = cur;
+}
+function renderChips() {
+  if (!$("#f-termino")) return;
+  const t = $("#f-termino").value;
+  rel.delete(t);
+  $("#chips").innerHTML = LISTA.filter(x => x.t !== t).map(x => `<button type="button" class="chip ${rel.has(x.t) ? "on" : ""}" data-c="${esc(x.t)}">${esc(x.t)}</button>`).join("");
+}
+$("#chips").addEventListener("click", e => {
+  const b = e.target.closest(".chip"); if (!b) return;
+  const t = b.dataset.c;
+  if (rel.has(t)) rel.delete(t); else { if (rel.size >= 4) return toast("Máximo 4 términos relacionados."); rel.add(t); }
+  renderChips(); preview();
+});
+function formData() {
+  const o = {}; FIELDS.forEach(k => o[k] = $("#f-" + k).value.trim());
+  o.categoria = catDe(o.termino); o.relacionados = [...rel].join(", ");
+  return o;
+}
+function preview() {
+  const o = formData();
+  $("#preview").innerHTML = entryHTML(o, true);
+  for (const k of ["definicion"]) {
+    const el = $("#f-" + k), c = document.querySelector(`[data-c="${k}"]`), min = +el.dataset.min;
+    c.textContent = `${el.value.trim().length} caracteres (mínimo ${min})`;
+    c.classList.toggle("bad", el.value.trim().length < min);
+  }
+}
+$("#fForm").addEventListener("input", e => { const f = e.target.closest(".field"); if (f) f.classList.remove("err"); if (e.target.id === "f-termino") renderChips(); preview(); });
+$("#f-termino").addEventListener("change", () => { renderChips(); preview(); });
+
+function validate(o) {
+  const bad = [];
+  if (o.autor.split(/\s+/).length < 2) bad.push("autor");
+  if (!o.termino) bad.push("termino");
+  ["definicion", "uso_coloquial", "uso_clinico", "error_frecuente"].forEach(k => { if (o[k].length < +$("#f-" + k).dataset.min) bad.push(k); });
+  if (o.termino && o.uso_clinico && !findTerm(o.uso_clinico, o.termino)) {
+    bad.push("uso_clinico"); $("#msgClin").textContent = `La frase clínica debe incluir el término «${o.termino}» (o una de sus formas).`;
+  } else $("#msgClin").textContent = "La frase clínica debe tener al menos 60 caracteres e incluir el término.";
+  if (!rel.size) bad.push("relacionados");
+  if (o.fuente_apa.length < 30 || !/\((\d{4}|s\.\s?f\.)\)/.test(o.fuente_apa)) bad.push("fuente_apa");
+  document.querySelectorAll("#fForm .field").forEach(f => f.classList.toggle("err", bad.includes(f.dataset.f)));
+  return bad;
+}
+$("#fForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const o = formData(), bad = validate(o);
+  if (bad.length) { document.querySelector(`[data-f="${bad[0]}"]`).scrollIntoView({ behavior: "smooth", block: "center" }); return toast("Revisá los campos marcados."); }
+  const btn = $("#btnSend"); btn.disabled = true; btn.textContent = "Enviando…";
+  o.codigo = genCode();
+  try {
+    await API.enviar(o);
+    $("#composeWrap").innerHTML = `<div class="done">
+      <h2 class="panel-title">Ficha enviada a revisión</h2>
+      <p class="lead" style="margin:0 auto">Tu ficha de <b>${esc(o.termino)}</b> quedó registrada. Guardá este código para consultar su estado:</p>
+      <div class="code">${o.codigo}</div>
+      <p style="color:var(--muted);font-size:14px">Si el docente te la devuelve con observaciones, el término vuelve a quedar disponible y podés enviar una versión corregida.</p>
+      <p><button class="btn ghost" onclick="location.reload()">Volver al inicio</button></p></div>`;
+    refresh();
+  } catch (err) {
+    toast(err.message || "No se pudo enviar la ficha."); btn.disabled = false; btn.textContent = "Enviar ficha a revisión";
+    refresh();
+  }
+});
+
+/* ============================================================
+   III. EJERCICIOS
+   ============================================================ */
+const MODES = {
+  nota: { name: "Leer la nota clínica", desc: "Identificá qué término falta en una frase redactada como en una nota clínica.", ask: "¿Qué término completa la nota clínica?",
+          prompt: f => maskTerm(esc(f.uso_clinico), f.termino), ok: f => findTerm(f.uso_clinico, f.termino) },
+  coloquial: { name: "Del habla cotidiana a la clínica", desc: "Traducí una expresión coloquial al término técnico que le corresponde.", ask: "¿Qué término clínico corresponde a esta expresión?",
+          prompt: f => `<i>${esc(f.uso_coloquial)}</i>`, ok: () => true },
+  definicion: { name: "Reconocer la definición", desc: "Leé la definición técnica y señalá el término que describe.", ask: "¿A qué término corresponde esta definición?",
+          prompt: f => maskTerm(esc(f.definicion), f.termino), ok: () => true }
+};
+const X = { mode: null, qs: [], i: 0, score: 0 };
+function exHome() {
+  const n = S.pub.length;
+  $("#exWrap").innerHTML = `<h2 class="panel-title">Ejercicios</h2>
+    <p class="lead">Los ejercicios se generan con las fichas publicadas (${n} de ${TOTAL}). A medida que el diccionario crece, hay más preguntas.</p>
+    ${n ? `<div class="ex-modes">${Object.entries(MODES).map(([k, m]) => `<button class="mode" data-m="${k}"><b>${m.name}</b><span>${m.desc}</span></button>`).join("")}</div>`
+        : `<p class="empty">Todavía no hay fichas publicadas.</p>`}`;
+}
+function distractors(t) {
+  const c = catDe(t);
+  const same = shuffle(LISTA.filter(x => x.c === c && x.t !== t).map(x => x.t));
+  const rest = shuffle(LISTA.filter(x => x.c !== c).map(x => x.t));
+  return [...same.slice(0, 2), ...rest].filter((v, i, a) => a.indexOf(v) === i).slice(0, 3);
+}
+function startEx(m) {
+  const pool = shuffle(S.pub.filter(MODES[m].ok)).slice(0, 10);
+  if (!pool.length) return toast("No hay fichas suficientes para este ejercicio.");
+  Object.assign(X, { mode: m, qs: pool.map(f => ({ f, opts: shuffle([f.termino, ...distractors(f.termino)]) })), i: 0, score: 0 });
+  renderQ();
+}
+function renderQ() {
+  const M = MODES[X.mode], q = X.qs[X.i];
+  $("#exWrap").innerHTML = `<div class="quiz">
+    <div class="q-head"><span>${M.name}</span><span>Pregunta ${X.i + 1} de ${X.qs.length} · Aciertos: ${X.score}</span></div>
+    <div class="q-prog"><i style="width:${X.i / X.qs.length * 100}%"></i></div>
+    <div class="q-prompt">${M.prompt(q.f)}</div>
+    <p class="q-ask">${M.ask}</p>
+    <div class="opts">${q.opts.map(o => `<button class="opt" data-o="${esc(o)}">${esc(o)}</button>`).join("")}</div>
+    <div class="fb" id="fb"></div></div>`;
+}
+function answer(o) {
+  const q = X.qs[X.i], right = o === q.f.termino;
+  if (right) X.score++;
+  document.querySelectorAll(".opt").forEach(b => { b.disabled = true; if (b.dataset.o === q.f.termino) b.classList.add("right"); else if (b.dataset.o === o) b.classList.add("wrong"); });
+  const fb = $("#fb"); fb.style.display = "block"; fb.classList.toggle("bad", !right);
+  const last = X.i === X.qs.length - 1;
+  fb.innerHTML = `<p><b>${right ? "Correcto." : `La respuesta es «${esc(q.f.termino)}».`}</b></p>
+    <p style="font-size:14px">${esc(q.f.error_frecuente)}</p>
+    <div class="row"><button class="btn sm" id="nx">${last ? "Ver resultado" : "Siguiente"}</button>
+    <button class="btn ghost sm" data-ver="${esc(q.f.termino)}">Ver ficha completa</button></div>`;
+}
+function result() {
+  const n = X.qs.length, p = Math.round(X.score / n * 100);
+  const msg = p >= 90 ? "Dominio sólido del vocabulario clínico." : p >= 70 ? "Buen manejo; repasá las fichas en las que fallaste." : "Conviene volver al diccionario y repasar los errores frecuentes.";
+  $("#exWrap").innerHTML = `<div class="quiz"><p class="eyebrow" style="color:var(--accent)">${MODES[X.mode].name}</p>
+    <div class="score">${X.score} / ${n}</div><p class="lead">${msg}</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" data-m="${X.mode}">Repetir</button><button class="btn ghost" id="exBack">Otros ejercicios</button></div></div>`;
+}
+$("#exWrap").addEventListener("click", e => {
+  const t = e.target.closest("button"); if (!t) return;
+  if (t.dataset.m) startEx(t.dataset.m);
+  else if (t.dataset.o) answer(t.dataset.o);
+  else if (t.id === "nx") { if (X.i < X.qs.length - 1) { X.i++; renderQ(); } else result(); }
+  else if (t.id === "exBack") exHome();
+  else if (t.dataset.ver) { go("diccionario"); select(t.dataset.ver); }
+});
+
+/* ============================================================
+   IV. ESTADO
+   ============================================================ */
+const EST = { pendiente: "En revisión", publicada: "Publicada", devuelta: "Devuelta con observaciones" };
+$("#stForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const c = $("#stCode").value.trim().toUpperCase(); if (!c) return;
+  try {
+    const r = await API.consultar(c);
+    $("#stOut").innerHTML = !r ? `<div class="status">No se encontró ninguna ficha con ese código.</div>`
+      : `<div class="status"><p style="margin:0 0 8px"><span class="badge b-${r.estado}">${EST[r.estado]}</span></p>
+         <p style="margin:0;font-family:var(--serif);font-size:20px">${esc(r.termino)}</p>
+         ${r.comentario ? `<p style="margin:12px 0 0"><b>Observaciones del docente:</b><br>${esc(r.comentario)}</p>` : ""}
+         ${r.estado === "devuelta" ? `<p style="margin:12px 0 0;font-size:14px;color:var(--muted)">Corregí tu ficha y enviala de nuevo desde <i>Redactar una ficha</i>.</p>` : ""}</div>`;
+  } catch (err) { toast("No se pudo consultar."); }
+});
+
+/* ============================================================
+   V. DOCENTE
+   ============================================================ */
+const D = { filtro: "pendiente", data: [] };
+async function docView() {
+  go("docente");
+  if (!(await API.sesion())) {
+    $("#docWrap").innerHTML = `<div class="narrow"><h2 class="panel-title">Acceso docente</h2><p class="lead">Ingresá con la cuenta creada en Supabase.</p>
+      <form id="lgForm"><div class="field"><label>Correo</label><input id="lgE" type="email" autocomplete="username"></div>
+      <div class="field"><label>Contraseña</label><input id="lgP" type="password" autocomplete="current-password"></div>
+      <button class="btn">Ingresar</button></form></div>`;
+    $("#lgForm").onsubmit = async e => { e.preventDefault(); try { await API.login($("#lgE").value, $("#lgP").value); docView(); } catch (err) { toast(err.message); } };
+    return;
+  }
+  try { D.data = await API.todas(); } catch (e) { return toast("No se pudieron cargar las fichas."); }
+  renderDoc();
+}
+function renderDoc() {
+  const cnt = k => D.data.filter(f => k === "todas" || f.estado === k).length;
+  const list = D.data.filter(f => D.filtro === "todas" || f.estado === D.filtro);
+  const ta = (f, k, label, rows = 3) => `<div class="field"><label>${label}</label><textarea rows="${rows}" data-k="${k}">${esc(f[k])}</textarea></div>`;
+  $("#docWrap").innerHTML = `<h2 class="panel-title">Moderación de fichas</h2>
+    <div class="mod-bar">
+      <div class="seg">${["pendiente", "publicada", "devuelta", "todas"].map(k => `<button data-fl="${k}" class="${D.filtro === k ? "on" : ""}">${k === "todas" ? "Todas" : EST[k]} (${cnt(k)})</button>`).join("")}</div>
+      <div style="display:flex;gap:8px"><button class="btn ghost sm" id="csv">Exportar CSV</button>${DEMO ? `<button class="btn ghost sm" id="reset">Reiniciar demostración</button>` : `<button class="btn ghost sm" id="out">Cerrar sesión</button>`}</div>
+    </div>
+    ${list.length ? list.map(f => `<details class="mcard" data-id="${f.id}" ${D.filtro === "pendiente" ? "open" : ""}>
+      <summary><span><span class="tt">${esc(f.termino)}</span> <span class="who">· ${esc(f.autor)} · ${new Date(f.creado).toLocaleDateString("es-NI")} · código ${esc(f.codigo || "")}</span></span><span class="badge b-${f.estado}">${EST[f.estado]}</span></summary>
+      <div class="body">
+        ${ta(f, "definicion", "Definición técnica", 4)}${ta(f, "uso_coloquial", "Uso coloquial", 2)}${ta(f, "uso_clinico", "Uso clínico")}
+        ${ta(f, "error_frecuente", "Error frecuente")}${ta(f, "relacionados", "Relacionados", 1)}${ta(f, "fuente_apa", "Fuente APA 7", 2)}
+        ${ta(f, "comentario", "Observaciones para el estudiante (obligatorio para devolver)", 2)}
+        <div class="acts"><button class="btn ok sm" data-a="publicada">Publicar</button><button class="btn warn sm" data-a="devuelta">Devolver</button>
+        <button class="btn ghost sm" data-a="guardar">Guardar cambios</button><button class="btn ghost sm" data-a="eliminar">Eliminar</button></div>
+      </div></details>`).join("") : `<p class="empty">No hay fichas en esta categoría.</p>`}`;
+}
+$("#docWrap").addEventListener("click", async e => {
+  const b = e.target.closest("button"); if (!b) return;
+  if (b.dataset.fl) { D.filtro = b.dataset.fl; return renderDoc(); }
+  if (b.id === "out") { await API.logout(); return docView(); }
+  if (b.id === "reset") { if (confirmReset()) { mem = null; try { localStorage.removeItem(LS); } catch (e) {} await refresh(); docView(); } return; }
+  if (b.id === "csv") return exportCSV();
+  const card = b.closest(".mcard"); if (!card || !b.dataset.a) return;
+  const id = card.dataset.id, patch = {};
+  card.querySelectorAll("textarea[data-k]").forEach(t => patch[t.dataset.k] = t.value.trim() || null);
+  try {
+    if (b.dataset.a === "eliminar") { if (!card.dataset.armed) { card.dataset.armed = 1; b.textContent = "Confirmar eliminación"; return; } await API.eliminar(id); toast("Ficha eliminada."); }
+    else if (b.dataset.a === "devuelta" && !patch.comentario) { card.querySelector('[data-k="comentario"]').focus(); return toast("Escribí las observaciones antes de devolver."); }
+    else { if (b.dataset.a !== "guardar") patch.estado = b.dataset.a; await API.actualizar(id, patch); toast(b.dataset.a === "publicada" ? "Ficha publicada." : b.dataset.a === "devuelta" ? "Ficha devuelta al estudiante." : "Cambios guardados."); }
+    D.data = await API.todas(); renderDoc(); refresh();
+  } catch (err) { console.error(err); toast(err.code === "23505" ? "Ya existe otra ficha activa de ese término." : "No se pudo guardar."); }
+});
+let resetArmed = 0;
+function confirmReset() { if (Date.now() - resetArmed < 4000) return true; resetArmed = Date.now(); toast("Pulsá de nuevo para borrar los datos de demostración."); return false; }
+function exportCSV() {
+  const cols = ["termino", "categoria", "autor", "estado", "codigo", "definicion", "uso_coloquial", "uso_clinico", "error_frecuente", "relacionados", "fuente_apa", "comentario", "creado"];
+  const q = v => `"${String(v ?? "").replace(/"/g, '""')}"`;
+  const csv = "﻿" + cols.join(",") + "\n" + D.data.map(f => cols.map(c => q(f[c])).join(",")).join("\n");
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+  a.download = "diccionario-psicopatologia1.csv"; a.click();
+}
+
+/* ============================================================
+   NAVEGACIÓN E INICIO
+   ============================================================ */
+function go(v) {
+  document.querySelectorAll(".view").forEach(s => s.classList.toggle("active", s.id === "v-" + v));
+  document.querySelectorAll(".tab").forEach(t => t.setAttribute("aria-selected", t.dataset.view === v));
+  if (v === "ejercicios") exHome();
+}
+document.querySelectorAll(".tab").forEach(t => t.onclick = () => go(t.dataset.view));
+$("#btnDoc").onclick = docView;
+
+(async () => {
+  if (DEMO) $("#demoBanner").hidden = false;
+  try { await API.init(); } catch (e) { toast("No se pudo cargar Supabase."); }
+  fillTermSelect(); renderChips(); preview();
+  await refresh();
+})();
+</script>
+</body>
+</html>
